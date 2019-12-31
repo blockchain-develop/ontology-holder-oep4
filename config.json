@@ -6,10 +6,10 @@
   "MySqlMaxConnSize":5,
   "MySqlMaxOpenConnSize":50,
   "MySqlConnMaxLifetime":300,
-  "OntologyRpcAddress":"http://polaris1.ont.io:20336",
+  "OntologyRpcAddress":"http://172.168.3.73:20336",
   "HttpServerPort":8080,
   "DBBatchSize":500,
   "DBBatchTime":5,
   "MaxQueryPageSize":100,
-  "Contracts":["0100000000000000000000000000000000000000", "0200000000000000000000000000000000000000"]
+  "Contracts":["92307ee76e6d2f2014d2c6298166bf75c2bc68dc"]
 }

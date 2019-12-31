@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	log4 "github.com/alecthomas/log4go"
@@ -219,29 +220,53 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 		if len(states) != 4 {
 			continue
 		}
-		if states[0] != NOTIFY_TRANSFER {
-			continue
+		contractType := TypeOfContract(notify.ContractAddress)
+		var transferFrom, transferTo string
+		var transferAmount uint64
+		if contractType == ONT_ADDRESS || contractType == ONG_ADDRESS {
+			if states[0] != NOTIFY_TRANSFER {
+				continue
+			}
+			transferFrom, ok = states[1].(string)
+			if !ok {
+				continue
+			}
+			transferTo, ok = states[2].(string)
+			if !ok {
+				continue
+			}
+			fromHex,_ := common.AddressFromBase58(transferFrom)
+			transferFrom = fromHex.ToHexString()
+			toHex,_ := common.AddressFromBase58(transferTo)
+			transferTo = toHex.ToHexString()
+			transferAmount, ok = states[3].(uint64)
+			if !ok {
+				continue
+			}
+		} else {
+			name, _ := hex.DecodeString(states[0].(string))
+			if string(name) != NOTIFY_TRANSFER {
+				continue
+			}
+			transferFrom, ok = states[1].(string)
+			if !ok {
+				continue
+			}
+			transferTo, ok = states[2].(string)
+			if !ok {
+				continue
+			}
+			amountBytes, _ := hex.DecodeString(states[3].(string))
+			if !ok {
+				continue
+			}
+			transferAmount = common.BigIntFromNeoBytes(amountBytes).Uint64()
 		}
-		transferFrom, ok := states[1].(string)
-		if !ok {
-			continue
-		}
-		transferTo, ok := states[2].(string)
-		if !ok {
-			continue
-		}
-		transferAmount, ok := states[3].(uint64)
-		if !ok {
-			continue
-		}
-
-		fromHex,_ := common.AddressFromBase58(transferFrom)
-		toHex,_ := common.AddressFromBase58(transferTo)
 		txTransfers = append(txTransfers, &TxTransfer{
 			TxHash:   txEvt.TxHash,
 			Contract: notify.ContractAddress,
-			From: fromHex.ToHexString(),
-			To: toHex.ToHexString(),
+			From: transferFrom,
+			To: transferTo,
 			/*
 			From:     SystemContractAddressTransfer(transferFrom),
 			To:       SystemContractAddressTransfer(transferTo),
@@ -262,6 +287,7 @@ func (this *OntologyManager) handleEvtNotify() {
 		select {
 		case evtNotify := <-this.syncEvtNotifyChan:
 			ontEvtNotifies := evtNotify.EventNotifies
+			log4.Debug("current height: %d", evtNotify.BlockHeight)
 			for _, ontEvt := range ontEvtNotifies {
 				transfers := this.getTxTransferFromNotify(ontEvt)
 				if len(transfers) == 0 {
@@ -400,11 +426,12 @@ func (this *OntologyManager) onTransfer(txNotifies []*TxEventNotify, txTransfers
 		if !ok || assetHolder.Balance < txTransfer.Amount {
 			err = fmt.Errorf("invalid transfer, Contact:%s TxHash:%s From:%s To:%s Amount:%d", txTransfer.Contract, txTransfer.TxHash, txTransfer.From, txTransfer.To, txTransfer.Amount)
 			log4.Error(err)
-			time.Sleep(time.Second) //wait to log
-			panic(err)
+			//time.Sleep(time.Second) //wait to log
+			//panic(err)
+		} else {
+			assetHolder.Balance -= txTransfer.Amount
+			assetHolderMap[key] = assetHolder
 		}
-		assetHolder.Balance -= txTransfer.Amount
-		assetHolderMap[key] = assetHolder
 
 		key = txTransfer.To + txTransfer.Contract
 		assetHolder, ok = assetHolderMap[key]
