@@ -1,0 +1,15 @@
+{
+  "MySqlAddress":"127.0.0.1:3306",
+  "MySqlUserName":"root",
+  "MySqlPassword":"root",
+  "MySqlDBName":"ontology_holder",
+  "MySqlMaxConnSize":5,
+  "MySqlMaxOpenConnSize":50,
+  "MySqlConnMaxLifetime":300,
+  "OntologyRpcAddress":"http://polaris1.ont.io:20336",
+  "HttpServerPort":8080,
+  "DBBatchSize":500,
+  "DBBatchTime":5,
+  "MaxQueryPageSize":100,
+  "Contracts":["0100000000000000000000000000000000000000", "0200000000000000000000000000000000000000"]
+}

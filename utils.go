@@ -3,10 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ontio/ontology/common"
 	"io/ioutil"
 	"os"
 	"sync"
+)
+
+const (
+	ONT_ADDRESS = iota
+	ONG_ADDRESS
+	OEP4_ADDRESS
+	UNKNOW_ADDRESS
 )
 
 type OneThreadExecLock struct {
@@ -59,6 +65,7 @@ func SaveJsonObject(filePath string, jsonObject interface{}) error {
 	return ioutil.WriteFile(filePath, data, 0666)
 }
 
+/*
 func SystemContractAddressTransfer(contractAddress string) string {
 	switch contractAddress {
 	case ONT_CONTRACT_ADDRESS_BASE58:
@@ -71,7 +78,9 @@ func SystemContractAddressTransfer(contractAddress string) string {
 		return contractAddress
 	}
 }
+*/
 
+/*
 func GetAddress(address string) (common.Address, error) {
 	addr, err := common.AddressFromBase58(address)
 	if err == nil {
@@ -82,6 +91,30 @@ func GetAddress(address string) (common.Address, error) {
 		return addr, nil
 	}
 	return common.ADDRESS_EMPTY, fmt.Errorf("invalid address")
+}
+*/
+
+func IsMonitorContract(contract string) bool {
+	for _, item := range DefConfig.Contracts {
+		if contract == item {
+			return true
+		}
+	}
+	return false
+}
+
+func TypeOfContract(contract string) uint32 {
+	if contract == "0100000000000000000000000000000000000000" {
+		return ONT_ADDRESS
+	} else if contract == "0200000000000000000000000000000000000000" {
+		return ONG_ADDRESS
+	}
+
+	if IsMonitorContract(contract) {
+		return OEP4_ADDRESS
+	} else {
+		return UNKNOW_ADDRESS
+	}
 }
 
 func IsFileExisted(filename string) bool {

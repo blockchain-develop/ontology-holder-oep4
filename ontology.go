@@ -6,6 +6,7 @@ import (
 	log4 "github.com/alecthomas/log4go"
 	ontsdk "github.com/ontio/ontology-go-sdk"
 	sdkcom "github.com/ontio/ontology-go-sdk/common"
+	"github.com/ontio/ontology/common"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -208,7 +209,7 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 	}
 	txTransfers := make([]*TxTransfer, 0, 2)
 	for _, notify := range txEvt.Notify {
-		if notify.ContractAddress != ONT_CONTRACT_ADDRESS && notify.ContractAddress != ONG_CONTRACT_ADDRESS {
+		if !IsMonitorContract(notify.ContractAddress) {
 			continue
 		}
 		states, ok := notify.States.([]interface{})
@@ -234,11 +235,17 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 			continue
 		}
 
+		fromHex,_ := common.AddressFromBase58(transferFrom)
+		toHex,_ := common.AddressFromBase58(transferTo)
 		txTransfers = append(txTransfers, &TxTransfer{
 			TxHash:   txEvt.TxHash,
 			Contract: notify.ContractAddress,
+			From: fromHex.ToHexString(),
+			To: toHex.ToHexString(),
+			/*
 			From:     SystemContractAddressTransfer(transferFrom),
 			To:       SystemContractAddressTransfer(transferTo),
+			*/
 			Amount:   transferAmount,
 		})
 	}
@@ -602,4 +609,70 @@ func (this *OntologyManager) GetAssetHolderCount(contract string) int {
 
 func (this *OntologyManager) Close() {
 	close(this.exitCh)
+}
+
+func (this *OntologyManager) OEP4Name(contract string) (string, error) {
+	contractAddr, err := common.AddressFromHexString(contract)
+	if err != nil {
+		fmt.Printf("error is %+v\n", err)
+		return "", err
+	}
+
+	preResult, err := this.ontSdk.NeoVM.PreExecInvokeNeoVMContract(contractAddr,
+		[]interface{}{"name", []interface{}{}})
+	if err != nil {
+		return "", err
+	}
+	name, _ := preResult.Result.ToString()
+	return name, nil
+}
+
+func (this *OntologyManager) OEP4Symbol(contract string) (string, error) {
+	contractAddr, err := common.AddressFromHexString(contract)
+	if err != nil {
+		fmt.Printf("error is %+v\n", err)
+		return "", err
+	}
+
+	preResult, err := this.ontSdk.NeoVM.PreExecInvokeNeoVMContract(contractAddr,
+		[]interface{}{"symbol", []interface{}{}})
+	if err != nil {
+		return "", err
+	}
+	symbol, _ := preResult.Result.ToString()
+	return symbol, nil
+}
+
+func (this *OntologyManager) OEP4Decimals(contract string) (byte, error){
+	contractAddr, err := common.AddressFromHexString(contract)
+	if err != nil {
+		fmt.Printf("error is %+v\n", err)
+		return 0, err
+	}
+
+	preResult, err := this.ontSdk.NeoVM.PreExecInvokeNeoVMContract(contractAddr,
+		[]interface{}{"decimals", []interface{}{}})
+	if err != nil {
+		fmt.Printf("error is %+v\n", err)
+		return 0, err
+	}
+	decimal, _ := preResult.Result.ToInteger()
+	return byte(decimal.Uint64()), nil
+}
+
+func (this *OntologyManager) OEP4Supply(contract string) (uint64, error){
+	contractAddr, err := common.AddressFromHexString(contract)
+	if err != nil {
+		fmt.Printf("error is %+v\n", err)
+		return 0, err
+	}
+
+	preResult, err := this.ontSdk.NeoVM.PreExecInvokeNeoVMContract(contractAddr,
+		[]interface{}{"totalSupply", []interface{}{}})
+	if err != nil {
+		fmt.Printf("error is %+v\n", err)
+		return 0, err
+	}
+	supply, _ := preResult.Result.ToInteger()
+	return supply.Uint64(), nil
 }

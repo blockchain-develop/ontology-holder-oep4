@@ -20,6 +20,7 @@ type Config struct {
 	DBBatchSize                     uint32
 	DBBatchTime                     uint32
 	MaxQueryPageSize                uint32
+	Contracts                       []string
 }
 
 func (this *Config) GetHeartbeatUpdateInterval() uint32 {
