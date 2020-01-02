@@ -1,6 +1,6 @@
 # Ontology-holder
 
-Ontology-holder show the holder of ONT and ONG.
+Ontology-holder show the holder of OEP4.
 
 ## How to use?
 
@@ -14,12 +14,12 @@ Note that you need create db scheme "ontology-holder" with utf-8 charset befer s
 
 ## API
 
-contract must be ont contract address: 0100000000000000000000000000000000000000 or ong contract address 0200000000000000000000000000000000000000
+contract must be OEP4 contract, such as b71fc841b203bcf08e81311131671885db689faf
 
 1. Get holder list of asset
 
 ```
-http://localhost:8080/getAssetHolder?qid=1&contract=0100000000000000000000000000000000000000&from=0&count=100
+http://localhost:8080/getAssetHolder?qid=1&contract=b71fc841b203bcf08e81311131671885db689faf&from=0&count=100
 ```
 
 from and count must larger 0, and count must smaller than 100.
@@ -27,19 +27,19 @@ from and count must larger 0, and count must smaller than 100.
 2. Get asset base info
 
 ```
-http://localhost:8080/GetAssetInfo?qid=1&contract=0100000000000000000000000000000000000000
+http://localhost:8080/GetAssetInfo?qid=1&contract=b71fc841b203bcf08e81311131671885db689faf
 ```
 
 3. Get total holder count
 
 ```
-http://localhost:8080/getAssetHolderCount?qid=1&contract=0100000000000000000000000000000000000000
+http://localhost:8080/getAssetHolderCount?qid=1&contract=b71fc841b203bcf08e81311131671885db689faf
 ```
 
 4. Get balance of address
 
 ```
-http://localhost:8090/getBalance?address=AMX6ZebrPDFELCYRMpSMbZWrhWkKbKg4y8&contract=0200000000000000000000000000000000000000
+http://localhost:8090/getBalance?address=98067c0ae9fd8f109956e06f5519a9bc0963f699&contract=b71fc841b203bcf08e81311131671885db689faf
 ```
 
 contract param is option.
