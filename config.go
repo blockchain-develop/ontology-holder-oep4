@@ -16,6 +16,7 @@ type Config struct {
 	UpdateHolderCountInterval       uint32
 	UpdateSyncedBlockHeightInterval uint32
 	OntologyRpcAddress              string
+	BlockHeight                     uint32
 	HttpServerPort                  uint32
 	DBBatchSize                     uint32
 	DBBatchTime                     uint32

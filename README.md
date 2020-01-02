@@ -4,10 +4,11 @@ Ontology-holder show the holder of ONT and ONG.
 
 ## How to use?
 
-Ontology-holder need an ontoloyg node to sync block data, and need a mysql scheme (ontolog-holder) to save data.
+Ontology-holder need an ontology node to sync block data, and need a mysql scheme (ontolog-holder) to save data.
 
-rename config-simpe.json tp config.json,
-and set Mysql address to "MysqlDataSourceName" field, and set Ontology node rpc address to "OntologyRpcAddress" field.
+Rename config-simpe.json to config.json, and set Mysql config, and set Ontology config.
+
+There are two important item, "BlockHeight" and "Contracts". "Contracts" includes the hash of oep4 contracts which you want to get the holders. "BlockHeight" item indicates the height where program will search blocks.
 
 Note that you need create db scheme "ontology-holder" with utf-8 charset befer setup Ontology-holder.
 

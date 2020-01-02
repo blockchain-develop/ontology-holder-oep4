@@ -589,6 +589,9 @@ func (this *OntologyManager) updateSyncedEvtNotifyBlockHeight() error {
 		//Insure all of the block transactions has already inserted to db
 		syncedBlockHeight--
 	}
+	if DefConfig.BlockHeight > syncedBlockHeight {
+		syncedBlockHeight = DefConfig.BlockHeight
+	}
 	this.SetSyncedEvtNotifyBlockHeight(syncedBlockHeight)
 	log4.Info("CurrentSyncedBlockHeight:%d", syncedBlockHeight)
 	return nil
