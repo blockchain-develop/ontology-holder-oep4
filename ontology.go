@@ -314,7 +314,7 @@ func (this *OntologyManager) handleEvtNotify() {
 				txEvtNotifies = append(txEvtNotifies, txEvtNotify)
 				log4.Info("EventNotify:%+v", txEvtNotify)
 
-				if len(txEvtNotifies) >= int(dbBatchSize) {
+				if len(txTransfers) >= int(dbBatchSize) {
 					this.retryOnTransfer(txEvtNotifies, txTransfers)
 					txEvtNotifies = make([]*TxEventNotify, 0, dbBatchSize)
 					txTransfers = make([]*TxTransfer, 0, dbBatchSize*2)
