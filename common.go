@@ -8,6 +8,8 @@ import (
 
 const (
 	NOTIFY_TRANSFER = "transfer"
+	INCREASE_PAX = "IncreasePAX"
+	DECREASE_PAX = "DecreasePAX"
 
 	/*
 	ONT_CONTRACT_ADDRESS               = "0100000000000000000000000000000000000000"
