@@ -29,8 +29,6 @@ type OntologyManager struct {
 	mysqlHelper                *MySqlHelper
 	syncedEvtNotifyBlockHeight uint32
 	syncEvtNotifyChan          chan *EventNotify
-	ONTTotalSupply             uint64
-	ONGTotalSupply             uint64
 	hb                         *Heartbeat
 	holderCounts               map[string]int
 	exitCh                     chan interface{}
@@ -58,10 +56,6 @@ func (this *OntologyManager) Start() error {
 	go this.startHeartbeat()
 	go this.startUpdateInfo()
 
-	err = this.initTotalSupply()
-	if err != nil {
-		return err
-	}
 	err = this.initSyncedEvtBlockHeight()
 	if err != nil {
 		return err
@@ -72,23 +66,6 @@ func (this *OntologyManager) Start() error {
 	}
 	go this.startSyncEvtNotify()
 	go this.handleEvtNotify()
-	return nil
-}
-
-func (this *OntologyManager) initTotalSupply() error {
-	ontTotal, err := this.ontSdk.Native.Ont.TotalSupply()
-	if err != nil {
-		return err
-	}
-	this.ONTTotalSupply = ontTotal
-	log4.Info("ONTTotalSupply:%d", ontTotal)
-	ongTotal, err := this.ontSdk.Native.Ong.TotalSupply()
-	if err != nil {
-		return err
-	}
-	this.ONGTotalSupply = ongTotal
-	log4.Info("ONGTotalSupply:%d", ongTotal)
-
 	return nil
 }
 
@@ -308,10 +285,6 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 			Contract: notify.ContractAddress,
 			From: transferFrom,
 			To: transferTo,
-			/*
-			From:     SystemContractAddressTransfer(transferFrom),
-			To:       SystemContractAddressTransfer(transferTo),
-			*/
 			Amount:   transferAmount,
 		})
 	}
@@ -579,28 +552,29 @@ func (this *OntologyManager) heartbeat() error {
 		this.SetCurrentNodeId(heartbeat.NodeId)
 		log4.Info("Current node switch to:%d", heartbeat.NodeId)
 		return nil
-	}
-	lastNodeId, err := this.mysqlHelper.CheckHeartbeatTimeout(HEARTBEAT_MODULE, DefConfig.GetHeartbeatTimeoutTime())
-	if err != nil {
-		return fmt.Errorf("OntologyManager CheckHeartbeatTimeout error:%s", err)
-	}
-	log4.Debug("CheckHeartbeatTimeout lastNodeId:%d", lastNodeId)
-	if lastNodeId == 0 {
-		return nil //heartbeat ok
-	}
-	log4.Info("Current node:%d heartbeat timeout", lastNodeId)
-	//heartbeat timeout
-	ok, err := this.mysqlHelper.ResetHeartbeat(HEARTBEAT_MODULE, NodeId, lastNodeId)
-	if err != nil {
-		return fmt.Errorf("OntologyManager ResetHeartbeat error:%s", err)
-	}
-	if !ok {
-		//reset failed
+	} else {
+		lastNodeId, err := this.mysqlHelper.CheckHeartbeatTimeout(HEARTBEAT_MODULE, DefConfig.GetHeartbeatTimeoutTime())
+		if err != nil {
+			return fmt.Errorf("OntologyManager CheckHeartbeatTimeout error:%s", err)
+		}
+		log4.Debug("CheckHeartbeatTimeout lastNodeId:%d", lastNodeId)
+		if lastNodeId == 0 {
+			return nil //heartbeat ok
+		}
+		log4.Info("Current node:%d heartbeat timeout", lastNodeId)
+		//heartbeat timeout
+		ok, err := this.mysqlHelper.ResetHeartbeat(HEARTBEAT_MODULE, NodeId, lastNodeId)
+		if err != nil {
+			return fmt.Errorf("OntologyManager ResetHeartbeat error:%s", err)
+		}
+		if !ok {
+			//reset failed
+			return nil
+		}
+		this.SetCurrentNodeId(NodeId)
+		log4.Info("NodeId:%d Switch to current node", NodeId)
 		return nil
 	}
-	this.SetCurrentNodeId(NodeId)
-	log4.Info("NodeId:%d Switch to current node", NodeId)
-	return nil
 }
 
 func (this *OntologyManager) startUpdateInfo() {

@@ -133,12 +133,6 @@ func (this *HttpServer) GetAssetInfo(req *HttpServerRequest, resp *HttpServerRes
 		resp.ErrorCode = ERR_INVALID_PARAMS
 		return
 	}
-	/*
-	if contract != ONG_CONTRACT_ADDRESS && contract != ONT_CONTRACT_ADDRESS {
-		resp.ErrorCode = ERR_INVALID_PARAMS
-		return
-	}
-	*/
 
 	assetInfo, err := this.getAssetInfo(contract)
 	if err != nil {
@@ -210,12 +204,6 @@ func (this *HttpServer) GetAssetHolderCount(req *HttpServerRequest, resp *HttpSe
 		resp.ErrorCode = ERR_INVALID_PARAMS
 		return
 	}
-	/*
-	if contract != ONG_CONTRACT_ADDRESS && contract != ONT_CONTRACT_ADDRESS {
-		resp.ErrorCode = ERR_INVALID_PARAMS
-		return
-	}
-	*/
 	resp.Result = DefOntologyMgr.GetAssetHolderCount(contract)
 }
 
@@ -254,20 +242,12 @@ func (this *HttpServer) GetAssetHolder(req *HttpServerRequest, resp *HttpServerR
 	tokenType := TypeOfContract(contract)
 	switch tokenType {
 	case ONT_ADDRESS:
-		totalSupply = DefOntologyMgr.ONTTotalSupply
+		totalSupply, _ = DefOntologyMgr.GetOntSdk().Native.Ont.TotalSupply()
 	case ONG_ADDRESS:
-		totalSupply = DefOntologyMgr.ONGTotalSupply
+		totalSupply,_ = DefOntologyMgr.GetOntSdk().Native.Ong.TotalSupply()
 	case OEP4_ADDRESS:
 		totalSupply, _ = DefOntologyMgr.OEP4Supply(contract)
 	}
-	/*
-	switch contract {
-	case ONT_CONTRACT_ADDRESS:
-		totalSupply = DefOntologyMgr.ONTTotalSupply
-	case ONG_CONTRACT_ADDRESS:
-		totalSupply = DefOntologyMgr.ONGTotalSupply
-	}
-	*/
 
 	if totalSupply == 0 {
 		resp.ErrorCode = ERR_INTERNAL
@@ -313,6 +293,10 @@ func (this *HttpServer) GetBalance(req *HttpServerRequest, resp *HttpServerRespo
 			log4.Info("GetAssetHolder GetParamString contract error:%s", err)
 			return
 		}
+	}
+	if !IsMonitorContract(contract) {
+		resp.ErrorCode = ERR_INVALID_PARAMS
+		return
 	}
 	assetHolders, err := DefOntologyMgr.GetAssetHolder(0, 0, address, contract)
 	if err != nil {
