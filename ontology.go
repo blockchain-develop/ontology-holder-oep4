@@ -114,7 +114,7 @@ func (this *OntologyManager) initGenesisBlock() error {
 				Address:  transfer.To,
 				Balance:  transfer.Amount,
 			})
-			transferEvts = append(transferEvts, []interface{}{NOTIFY_TRANSFER, transfer.From, transfer.To, transfer.Amount})
+			transferEvts = append(transferEvts, []interface{}{transfer.Name, transfer.From, transfer.To, transfer.Amount})
 		}
 		notifyJson, err := json.Marshal(transferEvts)
 		if err != nil {
@@ -200,10 +200,12 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 		contractType := TypeOfContract(notify.ContractAddress)
 		var transferFrom, transferTo string
 		var transferAmount uint64
+		var name string
 		if contractType == ONT_ADDRESS || contractType == ONG_ADDRESS {
 			if states[0] != NOTIFY_TRANSFER {
 				continue
 			}
+			name = NOTIFY_TRANSFER
 			transferFrom, ok = states[1].(string)
 			if !ok {
 				continue
@@ -222,8 +224,9 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 			}
 		} else {
 			if notify.ContractAddress != "6bbc07bae862db0d7867e4e5b1a13c663e2b4bc8" {
-				name, _ := hex.DecodeString(states[0].(string))
-				if string(name) != NOTIFY_TRANSFER {
+				which, _ := hex.DecodeString(states[0].(string))
+				name = string(which)
+				if name != NOTIFY_TRANSFER {
 					continue
 				}
 				transferFrom, ok = states[1].(string)
@@ -240,8 +243,9 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 				}
 				transferAmount = common.BigIntFromNeoBytes(amountBytes).Uint64()
 			} else {
-				name, _ := hex.DecodeString(states[0].(string))
-				if string(name) == NOTIFY_TRANSFER {
+				which, _ := hex.DecodeString(states[0].(string))
+				name = string(which)
+				if name == NOTIFY_TRANSFER {
 					transferFrom, ok = states[1].(string)
 					if !ok {
 						continue
@@ -255,7 +259,7 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 						continue
 					}
 					transferAmount = common.BigIntFromNeoBytes(amountBytes).Uint64()
-				} else if string(name) == INCREASE_PAX {
+				} else if name == INCREASE_PAX {
 					transferFrom = "0000000000000000000000000000000000000000"
 					transferTo, ok = states[1].(string)
 					if !ok {
@@ -266,7 +270,7 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 						continue
 					}
 					transferAmount = common.BigIntFromNeoBytes(amountBytes).Uint64()
-				} else if string(name) == DECREASE_PAX {
+				} else if name == DECREASE_PAX {
 					transferFrom, ok = states[1].(string)
 					if !ok {
 						continue
@@ -282,6 +286,7 @@ func (this *OntologyManager) getTxTransferFromNotify(txEvt *sdkcom.SmartContactE
 		}
 		txTransfers = append(txTransfers, &TxTransfer{
 			TxHash:   txEvt.TxHash,
+			Name: name,
 			Contract: notify.ContractAddress,
 			From: transferFrom,
 			To: transferTo,
@@ -311,7 +316,7 @@ func (this *OntologyManager) handleEvtNotify() {
 
 				transferEvts := make([][]interface{}, 0, 2)
 				for _, transfer := range transfers {
-					transferEvts = append(transferEvts, []interface{}{NOTIFY_TRANSFER, transfer.From, transfer.To, transfer.Amount})
+					transferEvts = append(transferEvts, []interface{}{transfer.Name, transfer.From, transfer.To, transfer.Amount})
 				}
 				notifyJson, err := json.Marshal(transferEvts)
 				if err != nil {

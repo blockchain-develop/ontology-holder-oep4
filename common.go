@@ -39,6 +39,7 @@ type Heartbeat struct {
 
 type TxTransfer struct {
 	TxHash   string
+	Name     string
 	Contract string
 	From     string
 	To       string
