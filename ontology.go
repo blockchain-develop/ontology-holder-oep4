@@ -518,6 +518,7 @@ func (this *OntologyManager) initHeartbeat() error {
 			return fmt.Errorf("InsertHeartbeat error:%s", err)
 		}
 	}
+	log4.Info("Current node:%d", heartbeat.NodeId)
 	this.hb = heartbeat
 	return this.heartbeat()
 }
@@ -551,11 +552,11 @@ func (this *OntologyManager) heartbeat() error {
 		}
 		//Node was been switched from current node.
 		heartbeat, err := this.mysqlHelper.GetHeartbeat(HEARTBEAT_MODULE)
-		if err != nil {
+		if err != nil || heartbeat == nil {
 			return fmt.Errorf("GetHeartbeat error:%s", err)
 		}
 		this.SetCurrentNodeId(heartbeat.NodeId)
-		log4.Info("Current node switch to:%d", heartbeat.NodeId)
+		log4.Info("Current node: %d switch to:%d", NodeId, heartbeat.NodeId)
 		return nil
 	} else {
 		lastNodeId, err := this.mysqlHelper.CheckHeartbeatTimeout(HEARTBEAT_MODULE, DefConfig.GetHeartbeatTimeoutTime())

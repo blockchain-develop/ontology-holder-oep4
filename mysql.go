@@ -439,7 +439,7 @@ func (this *MySqlHelper) UpdateHeartbeat(module string, nodeId uint32) (bool, er
 }
 
 func (this *MySqlHelper) CheckHeartbeatTimeout(module string, timeout uint32) (uint32, error) {
-	sqlText := fmt.Sprintf("Select ifnull(node_id,0) From heartbeat Where module = '%s' And (Now()-update_time) >= %d;", module, timeout)
+	sqlText := fmt.Sprintf("Select ifnull(node_id,0) From heartbeat Where module = '%s' And time_to_sec(timediff(Now(),update_time)) >= %d;", module, timeout)
 	rows, err := this.db.Query(sqlText)
 	if err != nil {
 		return 0, err
