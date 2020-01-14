@@ -54,6 +54,7 @@ type AssetHolderPer struct {
 	Address string  `json:"address"`
 	Balance uint64  `json:"balance"`
 	Percent float64 `json:"percent"`
+	Transactions uint64 `json:"transactions"`
 }
 
 func (this *HttpServer) Handler(w http.ResponseWriter, r *http.Request) {
@@ -267,6 +268,7 @@ func (this *HttpServer) GetAssetHolder(req *HttpServerRequest, resp *HttpServerR
 			Address: assetHolder.Address,
 			Balance: assetHolder.Balance,
 			Percent: float64(assetHolder.Balance) / float64(totalSupply),
+			Transactions: uint64(assetHolder.Transactions),
 		}
 		assetHolderPers = append(assetHolderPers, assetHolderPer)
 	}

@@ -58,6 +58,7 @@ type AssetHolder struct {
 	Address  string
 	Contract string
 	Balance  uint64
+	Transactions int
 }
 
 type HttpServerRequest struct {

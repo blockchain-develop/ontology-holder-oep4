@@ -113,6 +113,7 @@ func (this *OntologyManager) initGenesisBlock() error {
 				Contract: transfer.Contract,
 				Address:  transfer.To,
 				Balance:  transfer.Amount,
+				Transactions: 1,
 			})
 			transferEvts = append(transferEvts, []interface{}{transfer.Name, transfer.From, transfer.To, transfer.Amount})
 		}
@@ -444,6 +445,7 @@ func (this *OntologyManager) onTransfer(txNotifies []*TxEventNotify, txTransfers
 		return fmt.Errorf("GetAssetHolderByKey error:%s", err)
 	}
 
+	txMap := make(map[string]bool, len(txTransfers))
 	for _, txTransfer := range txTransfers {
 		var key string
 		if txTransfer.From != "0000000000000000000000000000000000000000" {
@@ -455,6 +457,12 @@ func (this *OntologyManager) onTransfer(txNotifies []*TxEventNotify, txTransfers
 				//time.Sleep(time.Second) //wait to log
 				//panic(err)
 			} else {
+				txKey := txTransfer.From + txTransfer.TxHash
+				_, ok := txMap[txKey]
+				if !ok {
+					txMap[txKey] = true
+					assetHolder.Transactions ++
+				}
 				assetHolder.Balance -= txTransfer.Amount
 				assetHolderMap[key] = assetHolder
 			}
@@ -468,7 +476,14 @@ func (this *OntologyManager) onTransfer(txNotifies []*TxEventNotify, txTransfers
 					Contract: txTransfer.Contract,
 					Address:  txTransfer.To,
 					Balance:  0,
+					Transactions: 0,
 				}
+			}
+			txKey := txTransfer.To + txTransfer.TxHash
+			_, ok = txMap[txKey]
+			if !ok {
+				txMap[txKey] = true
+				assetHolder.Transactions ++
 			}
 			assetHolder.Balance += txTransfer.Amount
 			assetHolderMap[key] = assetHolder
