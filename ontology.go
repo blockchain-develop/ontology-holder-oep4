@@ -694,8 +694,11 @@ func (this *OntologyManager) OEP4Name(contract string) (string, error) {
 		return "", err
 	}
 
+	/*
 	preResult, err := this.ontSdk.NeoVM.PreExecInvokeNeoVMContract(contractAddr,
 		[]interface{}{"name", []interface{}{}})
+	*/
+	preResult, err := this.ontSdk.WasmVM.PreExecInvokeWasmVMContract(contractAddr, "name", []interface{}{})
 	if err != nil {
 		return "", err
 	}
@@ -710,8 +713,11 @@ func (this *OntologyManager) OEP4Symbol(contract string) (string, error) {
 		return "", err
 	}
 
+	/*
 	preResult, err := this.ontSdk.NeoVM.PreExecInvokeNeoVMContract(contractAddr,
 		[]interface{}{"symbol", []interface{}{}})
+	*/
+	preResult, err := this.ontSdk.WasmVM.PreExecInvokeWasmVMContract(contractAddr, "symbol", []interface{}{})
 	if err != nil {
 		return "", err
 	}
@@ -726,8 +732,11 @@ func (this *OntologyManager) OEP4Decimals(contract string) (byte, error){
 		return 0, err
 	}
 
+	/*
 	preResult, err := this.ontSdk.NeoVM.PreExecInvokeNeoVMContract(contractAddr,
 		[]interface{}{"decimals", []interface{}{}})
+	*/
+	preResult, err := this.ontSdk.WasmVM.PreExecInvokeWasmVMContract(contractAddr, "decimals", []interface{}{})
 	if err != nil {
 		fmt.Printf("error is %+v\n", err)
 		return 0, err
@@ -743,8 +752,11 @@ func (this *OntologyManager) OEP4Supply(contract string) (uint64, error){
 		return 0, err
 	}
 
+	/*
 	preResult, err := this.ontSdk.NeoVM.PreExecInvokeNeoVMContract(contractAddr,
 		[]interface{}{"totalSupply", []interface{}{}})
+	*/
+	preResult, err := this.ontSdk.WasmVM.PreExecInvokeWasmVMContract(contractAddr, "totalSupply", []interface{}{})
 	if err != nil {
 		fmt.Printf("error is %+v\n", err)
 		return 0, err
